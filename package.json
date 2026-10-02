@@ -1,0 +1,29 @@
+{
+  "name": "smarttrip",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SmartTrip: AI travel planning and women's safety app",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix mobile",
+    "setup": "npm run env:copy && npm run install:all && npm --prefix server run setup",
+    "env:copy": "node scripts/copy-env.mjs",
+    "dev": "concurrently -n server,mobile -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix mobile run start\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:mobile": "npm --prefix mobile run start",
+    "mobile:ios": "npm --prefix mobile run ios",
+    "mobile:android": "npm --prefix mobile run android",
+    "mobile:web": "npm --prefix mobile run web",
+    "test": "npm --prefix server run test",
+    "typecheck": "npm --prefix server run typecheck && npm --prefix mobile run typecheck",
+    "lint": "npm --prefix server run lint && npm --prefix mobile run lint",
+    "build:server": "npm --prefix server run build",
+    "doctor": "npm --prefix mobile exec expo-doctor",
+    "db:reset": "npm --prefix server run db:reset"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

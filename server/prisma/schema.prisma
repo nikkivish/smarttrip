@@ -1,0 +1,158 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TripStatus {
+  DRAFT
+  PLANNING
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+}
+
+enum SafetyLevel {
+  SAFE
+  CAUTION
+  RISK
+}
+
+enum AlertType {
+  CHECK_IN
+  SOS
+  AREA_RISK
+  CONTACT
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trips             Trip[]
+  emergencyContacts EmergencyContact[]
+  alerts            Alert[]
+  checkIns          CheckIn[]
+}
+
+model EmergencyContact {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  phone     String
+  relation  String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Trip {
+  id            String     @id @default(cuid())
+  userId        String
+  title         String
+  destination   String
+  startDate     DateTime
+  endDate       DateTime
+  coverImageUrl String?
+  status        TripStatus @default(DRAFT)
+  travellers    Int        @default(1)
+  budget        Float?
+  currency      String     @default("INR")
+  safetyScore   Int?
+  safetyLevel   SafetyLevel?
+  summary       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itinerary ItineraryDay[]
+  alerts    Alert[]
+
+  @@index([userId, startDate])
+}
+
+model ItineraryDay {
+  id      String @id @default(cuid())
+  tripId  String
+  day     Int
+  date    DateTime
+  title   String
+  summary String?
+
+  trip  Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  items ItineraryItem[]
+
+  @@unique([tripId, day])
+  @@index([tripId])
+}
+
+model ItineraryItem {
+  id          String      @id @default(cuid())
+  dayId       String
+  time        String
+  title       String
+  description String?
+  category    String
+  cost        Float?
+  safetyLevel SafetyLevel?
+  latitude    Float?
+  longitude   Float?
+  placeLabel  String?
+  imageUrl    String?
+
+  day ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  userId      String
+  tripId      String?
+  type        AlertType
+  severity    AlertSeverity @default(INFO)
+  message     String
+  latitude    Float?
+  longitude   Float?
+  acknowledged Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip? @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  tripId    String?
+  note      String?
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
