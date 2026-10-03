@@ -249,51 +249,71 @@ values live in provider environment variables only.
 
 | Piece            | Where                    | Notes                                                        |
 | ---------------- | ------------------------ | ------------------------------------------------------------ |
-| Database         | Neon PostgreSQL          | Fresh production database. `DATABASE_URL` is its pooled URL |
+| Database         | Neon PostgreSQL          | Fresh production database, pooled URL for runtime            |
 | API              | Render Web Service       | Node, Express, Prisma migrations on release                 |
 | Web app          | Render Static Site       | Expo web export served from `mobile/dist`                   |
+
+Neon runs PgBouncer in transaction mode, so the two connection strings are not
+interchangeable: the app uses the **pooled** URL (hostname contains `-pooler`) while
+Prisma CLI commands such as `migrate deploy` need the **direct** URL. `prisma.config.ts`
+prefers `DIRECT_URL` for exactly that reason.
 
 **API (Render Web Service)**
 
 | Setting      | Value                                                     |
 | ------------ | --------------------------------------------------------- |
 | Root         | `server`                                                   |
-| Build        | `npm install && npm run build`                             |
+| Build        | `npm ci --include=dev && npm run build`                     |
 | Start        | `npm start`                                                 |
 | Release      | `npm run prisma:migrate:deploy`                            |
-| Health check | `/api/v1/health`                                           |
+| Health check | `/health`                                                   |
+
+`--include=dev` is required: Render exports `NODE_ENV=production` to the build, which
+makes npm omit devDependencies, and `postinstall` runs `prisma generate`, which needs the
+CLI from devDependencies. Without the flag the build fails with
+`'prisma' is not recognized`.
 
 Environment variables (set them in the dashboard, never in the repo):
 
 ```
 NODE_ENV=production
-DATABASE_URL=<Neon pooled connection string>
+DATABASE_URL=<Neon pooled URL, -pooler hostname, sslmode=require>
+DIRECT_URL=<Neon direct URL, no -pooler, sslmode=require>
 JWT_SECRET=<48+ random characters>
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=<the static site's origin>
+CORS_ORIGIN=https://<static-site>.onrender.com
 OPENAI_API_KEY=<optional; blank uses the built-in mock generator>
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
 ```
 
-`PORT` is injected by Render. `TWILIO_*` are optional and only needed if an SMS provider
-is wired into `safety.service.ts`.
+`CORS_ORIGIN` takes one origin or a comma-separated allowlist. It must match the static
+site exactly (scheme included) or the browser blocks every request. `PORT` is injected by
+Render. `TWILIO_*` are optional and only needed if an SMS provider is wired into
+`safety.service.ts`. Do not run `db:seed` against production: it creates
+`demo@smarttrip.app` with a published password.
 
 **Web app (Render Static Site)**
 
 | Setting    | Value                                                          |
 | ---------- | -------------------------------------------------------------- |
 | Root       | `mobile`                                                        |
-| Build      | `npm install && npm run build:web`                              |
+| Build      | `npm ci && npm run build:web`                                   |
 | Publish    | `dist`                                                          |
-| Env        | `EXPO_PUBLIC_API_URL=<the API's https origin + /api/v1>`        |
+| Env        | `EXPO_PUBLIC_API_URL=https://<api-service>.onrender.com/api/v1` |
 
-`build:web` writes `dist/_redirects` so deep links such as `/trip/123` fall back to
-`index.html` instead of 404ing, and it fails the build if the API URL was not inlined
-correctly. Set `CORS_ORIGIN` on the API to the static site's origin so the two can talk.
+Add a **rewrite** rule under the site's Settings → Redirects/Rewrites:
 
-Migrations run only from the Render release command, never from the build, so a failed
-deploy cannot leave a half-migrated database.
+| Action   | Source | Destination |
+| -------- | ------ | ----------- |
+| Rewrite  | `/*`   | `/index.html` |
+
+Render serves static files from its CDN and does not read Netlify-style `_redirects`
+files, so without this rule a refresh on `/trip/123` returns a CDN 404. The exported
+`dist/404.html` and `dist/_redirects` are harmless extras, not the mechanism.
+
+`build:web` fails the build if the API URL was not inlined correctly, so a green build is
+proof the bundle points at the deployed API.
 
 ## Security notes
 

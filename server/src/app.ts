@@ -10,12 +10,25 @@ import { tripsRouter } from './routes/trips.routes';
 import { safetyRouter } from './routes/safety.routes';
 import { assistantRouter } from './routes/assistant.routes';
 
+/**
+ * Accepts a comma-separated allowlist so a stray comma cannot silently produce
+ * one unusable origin. `*` (or an empty value) keeps the reflect-any behaviour.
+ */
+function allowedOrigins(value: string): true | string[] {
+  const origins = value
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (origins.length === 0 || origins.includes('*')) return true;
+  return origins;
+}
+
 export function createApp() {
   const app = express();
 
   app.set('trust proxy', 1);
   app.use(helmet());
-  app.use(cors({ origin: isProd ? env.CORS_ORIGIN : true }));
+  app.use(cors({ origin: isProd ? allowedOrigins(env.CORS_ORIGIN) : true }));
   app.use(express.json({ limit: '1mb' }));
   if (!isProd) app.use(morgan('dev'));
 
