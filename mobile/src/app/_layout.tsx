@@ -27,6 +27,7 @@ function RootNavigator() {
           Must not share its path with any other route.
         */}
         <Stack.Screen name="index" />
+        <Stack.Screen name="analytics" />
 
         <Stack.Protected guard={isSignedIn}>
           <Stack.Screen name="(tabs)" />

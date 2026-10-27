@@ -20,7 +20,7 @@ export default function LoginScreen() {
     setError(null);
     setBusy(true);
     try {
-      await login(email.trim(), password);
+      await login(email.trim().toLowerCase(), password);
       router.replace('/(tabs)/home');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');

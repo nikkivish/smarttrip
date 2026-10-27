@@ -2,8 +2,8 @@ import type { ImageSource } from './images';
 import { images } from './images';
 import type { SafetyLevel } from './colors';
 
-/** The five destinations in the floating bottom navigation. */
-export type TabKey = 'home' | 'explore' | 'plan' | 'trips' | 'safety';
+/** Destinations in the existing floating and desktop navigation. */
+export type TabKey = 'home' | 'explore' | 'plan' | 'trips' | 'safety' | 'analytics';
 
 type TabMeta = {
   key: TabKey;
@@ -27,6 +27,7 @@ export const tabs: readonly TabMeta[] = [
   { key: 'plan', label: 'Plan', icon: 'sparkles-outline', iconActive: 'sparkles', href: '/(tabs)/plan' },
   { key: 'trips', label: 'Trips', icon: 'map-outline', iconActive: 'map', href: '/(tabs)/trips' },
   { key: 'safety', label: 'Safety', icon: 'shield-checkmark-outline', iconActive: 'shield-checkmark', href: '/(tabs)/safety' },
+  { key: 'analytics', label: 'Analytics', icon: 'analytics-outline', iconActive: 'analytics', href: '/(tabs)/analytics' },
 ] as const;
 
 /** Declared separately so `Destination` does not reference `destinations`, which

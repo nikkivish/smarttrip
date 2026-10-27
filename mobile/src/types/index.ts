@@ -125,3 +125,73 @@ export type AssistantReply = {
   itinerary?: AssistantPlan;
   safetyNotes?: string[];
 };
+
+export type AnalyticsInsight = {
+  id: string;
+  level: 'info' | 'success' | 'warning';
+  message: string;
+};
+
+export type AnalyticsResponse = {
+  meta: {
+    scope: 'user' | 'global';
+    generatedAt: string;
+    currencies: string[];
+  };
+  kpis: {
+    totalUsers: number;
+    totalTrips: number;
+    itineraryDays: number;
+    itineraryItems: number;
+    totalAlerts: number;
+    averageTripBudget: number;
+    averageTripDuration: number;
+    averageSafetyScore: number;
+    totalTravellers: number;
+    totalPlannedCost: number;
+    alertAcknowledgementRate: number;
+  };
+  destinations: {
+    destination: string;
+    tripCount: number;
+    totalBudget: number;
+    averageBudget: number | null;
+    averageTripDuration: number;
+    averageSafetyScore: number | null;
+    totalTravellers: number;
+  }[];
+  costByCategory: {
+    category: string;
+    itemCount: number;
+    totalCost: number;
+    costSharePercentage: number;
+  }[];
+  budgetAnalysis: {
+    tripId: string;
+    title: string;
+    destination: string;
+    currency: string;
+    budget: number;
+    plannedCost: number;
+    remainingBudget: number;
+    utilizationPercentage: number | null;
+    isOverBudget: boolean;
+  }[];
+  safety: {
+    totalAlerts: number;
+    sosAlerts: number;
+    checkInAlerts: number;
+    areaRiskAlerts: number;
+    contactAlerts: number;
+    infoAlerts: number;
+    warningAlerts: number;
+    criticalAlerts: number;
+    acknowledged: number;
+    unacknowledged: number;
+    acknowledgementRate: number;
+    totalCheckIns: number;
+    byType: { type: string; count: number }[];
+    bySeverity: { severity: string; count: number }[];
+  };
+  insights: AnalyticsInsight[];
+};

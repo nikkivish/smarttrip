@@ -74,6 +74,18 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        <Card style={styles.analytics}>
+          <View style={styles.analyticsText}>
+            <Text style={styles.sectionTitle}>Trip analytics</Text>
+            <Text style={styles.empty}>Review your trips, budgets and safety activity.</Text>
+          </View>
+          <Button
+            label="View analytics"
+            variant="outline"
+            onPress={() => router.push('/(tabs)/analytics')}
+          />
+        </Card>
+
         <Button label="Sign out" variant="ghost" onPress={logout} fullWidth style={styles.signOut} />
       </ScrollView>
     </View>
@@ -106,5 +118,7 @@ const styles = StyleSheet.create({
   contactMeta: { color: colors.textMuted, fontSize: fontSize.sm },
   primaryTag: { color: colors.primary, fontSize: fontSize.xs, fontWeight: fontWeight.bold },
   empty: { color: colors.textMuted, fontSize: fontSize.sm },
+  analytics: { alignItems: 'center', flexDirection: 'row', gap: spacing.md },
+  analyticsText: { flex: 1, gap: spacing.xs },
   signOut: { alignSelf: 'center', maxWidth: layout.readableMaxWidth, width: '100%' },
 });

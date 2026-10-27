@@ -12,6 +12,8 @@
     "env:copy": "node scripts/copy-env.mjs",
     "dev": "concurrently -n server,mobile -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix mobile run start\"",
     "dev:server": "npm --prefix server run dev",
+    "db:dev": "npm --prefix server run db:dev",
+    "db:stop": "npm --prefix server run db:stop",
     "dev:mobile": "npm --prefix mobile run start",
     "mobile:ios": "npm --prefix mobile run ios",
     "mobile:android": "npm --prefix mobile run android",

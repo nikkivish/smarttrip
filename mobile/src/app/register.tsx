@@ -18,13 +18,23 @@ export default function RegisterScreen() {
   const set = (key: keyof typeof form) => (value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  const nameValid = form.name.trim().length >= 2 && form.name.trim().length <= 80;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const passwordValid = form.password.length >= 8 && form.password.length <= 200;
+  const phoneValid = !form.phone.trim() || (form.phone.trim().length >= 6 && form.phone.trim().length <= 20);
+  const canSubmit = nameValid && emailValid && passwordValid && phoneValid;
+
   const onSubmit = async () => {
     setError(null);
+    if (!canSubmit) {
+      setError('Use a name with 2+ characters, a valid email, a password with 8+ characters, and a phone with 6+ digits if provided.');
+      return;
+    }
     setBusy(true);
     try {
       await register({
         name: form.name.trim(),
-        email: form.email.trim(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
         phone: form.phone.trim() || undefined,
       });
@@ -35,8 +45,6 @@ export default function RegisterScreen() {
       setBusy(false);
     }
   };
-
-  const canSubmit = Boolean(form.name && form.email && form.password);
 
   return (
     <AuthShell

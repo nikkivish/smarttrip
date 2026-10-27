@@ -9,6 +9,7 @@ import { authRouter } from './routes/auth.routes';
 import { tripsRouter } from './routes/trips.routes';
 import { safetyRouter } from './routes/safety.routes';
 import { assistantRouter } from './routes/assistant.routes';
+import { analyticsRouter } from './routes/analytics.routes';
 
 /**
  * Accepts a comma-separated allowlist so a stray comma cannot silently produce
@@ -19,7 +20,11 @@ function allowedOrigins(value: string): true | string[] {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
-  if (origins.length === 0 || origins.includes('*')) return true;
+
+  if (origins.length === 0 || origins.includes('*')) {
+    return true;
+  }
+
   return origins;
 }
 
@@ -30,16 +35,24 @@ export function createApp() {
   app.use(helmet());
   app.use(cors({ origin: isProd ? allowedOrigins(env.CORS_ORIGIN) : true }));
   app.use(express.json({ limit: '1mb' }));
-  if (!isProd) app.use(morgan('dev'));
+
+  if (!isProd) {
+    app.use(morgan('dev'));
+  }
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'smarttrip-api', uptime: process.uptime() });
+    res.json({
+      status: 'ok',
+      service: 'smarttrip-api',
+      uptime: process.uptime(),
+    });
   });
 
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/trips', tripsRouter);
   app.use('/api/v1/safety', safetyRouter);
   app.use('/api/v1/assistant', assistantRouter);
+  app.use('/api/v1/analytics', analyticsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

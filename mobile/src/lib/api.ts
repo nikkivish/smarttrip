@@ -11,6 +11,7 @@ import type {
   AssistantPlan,
   AssistantReply,
   AuthSession,
+  AnalyticsResponse,
 } from '@/types';
 
 export class ApiError extends Error {
@@ -145,6 +146,11 @@ export const assistantApi = {
       safetyNotes: string[];
       created: boolean;
     }>('/assistant/adopt', body, token),
+};
+
+export const analyticsApi = {
+  get: (token: string, signal?: AbortSignal) =>
+    api.get<AnalyticsResponse>('/analytics', token, signal),
 };
 
 export const safetyApi = {

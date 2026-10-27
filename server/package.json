@@ -9,6 +9,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "db:dev": "prisma dev --detach",
+    "db:stop": "prisma dev stop default",
     "build": "tsc -p tsconfig.json && node scripts/fix-esm-extensions.mjs",
     "start": "node dist/src/index.js",
     "lint": "tsc -p tsconfig.json --noEmit",
